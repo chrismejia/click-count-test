@@ -38,34 +38,41 @@ const randomNum = () => {
   return Math.floor(Math.random() * 100);
 };
 
-test("renders without error", () => {
-  const wrapper = setup();
-  const appComponent = findByTestAttr(wrapper, "comp-app");
-  expect(appComponent.length).toBe(1);
-});
+describe("The app", () => {
+  test("renders without error", () => {
+    const wrapper = setup();
+    const appComponent = findByTestAttr(wrapper, "comp-app");
+    expect(appComponent.length).toBe(1);
+  });
 
-test("renders increment button", () => {
-  const wrapper = setup();
-  const incButton = findByTestAttr(wrapper, "btn-inc");
-  expect(incButton.length).toBe(1);
-});
+  test("renders increment button", () => {
+    const wrapper = setup();
+    const incButton = findByTestAttr(wrapper, "btn-inc");
+    expect(incButton.length).toBe(1);
+  });
 
-test("renders counter display", () => {
-  const wrapper = setup();
-  const counterDisplay = findByTestAttr(wrapper, "count-display");
-  expect(counterDisplay.length).toBe(1);
-});
+  test("renders decrement button", () => {
+    const wrapper = setup();
+    const decButton = findByTestAttr(wrapper, "btn-dec");
+    expect(decButton.length).toBe(1);
+  });
 
-/**
- * Uses Enzyme's .state() function to grab the value from the state
- */
-test("counter starts at 0", () => {
-  const wrapper = setup();
-  const initialCounterState = wrapper.state("counter");
-  expect(initialCounterState).toBe(0);
-});
+  test("renders counter display", () => {
+    const wrapper = setup();
+    const counterDisplay = findByTestAttr(wrapper, "count-display");
+    expect(counterDisplay.length).toBe(1);
+  });
 
-describe("clicking the button increments the counter", () => {
+  /**
+   * Uses Enzyme's .state() function to grab the value from the state
+   */
+  test("counter starts at 0", () => {
+    const wrapper = setup();
+    const initialCounterState = wrapper.state("counter");
+    expect(initialCounterState).toBe(0);
+  });
+});
+describe("Clicking the increment button increases the counter", () => {
   test("by 1", () => {
     const counter = 7;
     const wrapper = setup(null, { counter });
@@ -95,7 +102,7 @@ describe("clicking the button increments the counter", () => {
   });
 
   test("by a random amount", () => {
-    const counter = randomNum();
+    const counter = 417;
     const numOfClicks = randomNum();
 
     const wrapper = setup(null, { counter });
@@ -109,5 +116,59 @@ describe("clicking the button increments the counter", () => {
     // Find display and value
     const countDisplay = findByTestAttr(wrapper, "count-display");
     expect(countDisplay.text()).toContain(counter + numOfClicks);
+  });
+});
+
+describe("Clicking the decrement button decreases the counter", () => {
+  test("by 1", () => {
+    const counter = 70;
+    const wrapper = setup(null, { counter });
+    const decBtn = findByTestAttr(wrapper, "btn-dec");
+
+    decBtn.simulate("click");
+    const countDisplay = findByTestAttr(wrapper, "count-display");
+    expect(countDisplay.text()).toContain(counter - 1);
+  });
+
+  test("by 3", () => {
+    const counter = 70;
+    const wrapper = setup(null, { counter });
+    const decBtn = findByTestAttr(wrapper, "btn-dec");
+
+    for (let i = 0; i < 3; i++) {
+      decBtn.simulate("click");
+    }
+
+    const countDisplay = findByTestAttr(wrapper, "count-display");
+    expect(countDisplay.text()).toContain(counter - 3);
+  });
+
+  test("by a random amount", () => {
+    const counter = 250;
+    const clickCount = randomNum();
+
+    const wrapper = setup(null, { counter });
+    const decBtn = findByTestAttr(wrapper, "btn-dec");
+
+    for (let i = 0; i < clickCount; i++) {
+      decBtn.simulate("click");
+    }
+
+    const display = findByTestAttr(wrapper, "count-display");
+    expect(display.text()).toContain(counter - clickCount);
+  });
+});
+
+describe("The counter does not go below 0", () => {
+  test("when counter is 0 & decrement is clicked", () => {
+    const counter = 0;
+    const wrapper = setup(null, { counter });
+
+    const decBtn = findByTestAttr(wrapper, "btn-dec");
+    decBtn.simulate("click");
+
+    const display = findByTestAttr(wrapper, "count-display");
+    expect(display.text()).toContain(0);
+    expect(wrapper).toThrow(Error);
   });
 });
